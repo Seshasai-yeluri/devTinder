@@ -52,15 +52,25 @@ reviewRouter.get("/feed",Auth, async(req,res)=>{
     const toId = req.loggedInUserId;
     console.log("toId",toId)
 
-    const connectionData = await RequestModel.find({
+    const connectionData1 = await RequestModel.find({
         toId:toId
     });
+    const FromIdData = connectionData1.map((item)=>item.fromId)
 
+    const connectionData2 = await RequestModel.find({
+        fromId:toId
+    })
+
+    const toIdData = connectionData2.map((item)=>item.toId)
+
+    const combinedData = [...FromIdData,...toIdData]
+ 
+    console.log("combinedData",combinedData)
     const allUserData = await UserModel.find(UserModel.find({
   _id: { $ne: toId }
 }));
 
-const connectionDataFromIdList = connectionData.map((item)=>item.fromId.toString());
+const connectionDataFromIdList = combinedData.map((item)=>item.toString());
     const filteredData = allUserData.filter((user)=>!connectionDataFromIdList.includes(user._id.toString()));
     res.status(200).send(filteredData);
 }
@@ -68,6 +78,7 @@ catch(err){
     res.status(400).send("Error " + err.message)
 }
 })
+
 
 
 
